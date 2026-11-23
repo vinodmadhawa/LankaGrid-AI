@@ -11,10 +11,17 @@ FEATURES=['lag_1','lag_2','lag_3','lag_7','lag_14','lag_28','mean_7','mean_14','
 
 def load_data(path, date_col, target_col):
     df=pd.read_csv(path)
-    if date_col not in df or target_col not in df: raise ValueError(f'Columns not found. Available: {list(df.columns)}')
-    df=df[[date_col,target_col]].rename(columns={date_col:'date',target_col:'energy_gwh'})
-    df['date']=pd.to_datetime(df['date'],errors='coerce')
-    df['energy_gwh']=pd.to_numeric(df['energy_gwh'],errors='coerce')
+    if date_col not in df: raise ValueError(f'Date column not found. Available: {list(df.columns)}')
+    if target_col in df:
+        df=df[[date_col,target_col]].rename(columns={date_col:'date',target_col:'energy_gwh'})
+        df['date']=pd.to_datetime(df['date'],errors='coerce')
+        df['energy_gwh']=pd.to_numeric(df['energy_gwh'],errors='coerce')
+    else:
+        df=df.rename(columns={date_col:'date'})
+        df['date']=pd.to_datetime(df['date'],errors='coerce')
+        numeric_columns=[c for c in df.columns if c!='date']
+        values=df[numeric_columns].replace('Data N/A',np.nan).apply(pd.to_numeric,errors='coerce')
+        df['energy_gwh']=values.sum(axis=1).where(values.notna().any(axis=1))
     df=df.dropna().sort_values('date')
     if df.date.duplicated().any(): raise ValueError('Duplicate dates: aggregate to one daily total first.')
     if (df.energy_gwh<=0).any(): raise ValueError('Nonpositive generation detected; check data and units.')

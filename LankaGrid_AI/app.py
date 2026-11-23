@@ -299,10 +299,16 @@ def load_artifacts():
 
 @st.cache_data(show_spinner=False)
 def load_dataset():
-    data_path = DATA / "electricity.csv"
+    data_path = DATA / "merged-generation-profile-2017-2026.csv"
     if not data_path.exists():
         return pd.DataFrame(columns=["date", "total_gwh"])
-    df = pd.read_csv(data_path, parse_dates=["date"])
+    df = pd.read_csv(data_path)
+    date_col = df.columns[0]
+    df["date"] = pd.to_datetime(df[date_col], errors="coerce")
+    numeric_columns = [c for c in df.columns if c not in [date_col, "date"]]
+    values = df[numeric_columns].replace("Data N/A", np.nan).apply(pd.to_numeric, errors="coerce")
+    df["total_gwh"] = values.sum(axis=1).where(values.notna().any(axis=1))
+    df = df[["date", "total_gwh"]]
     df = df.sort_values("date").drop_duplicates("date")
     df["total_gwh"] = pd.to_numeric(df["total_gwh"], errors="coerce")
     return df
@@ -353,7 +359,7 @@ if not artifacts["available"]:
     st.error("The dashboard could not load the trained model artifacts.")
     for error in artifacts["errors"]:
         st.write(error)
-    st.info("Run: `python train.py --csv data/electricity.csv --date-col date --target-col total_gwh`")
+    st.info('Run: `python train.py --csv data/merged-generation-profile-2017-2026.csv --date-col "Date (GMT+5:30)" --target-col total_gwh`')
     st.stop()
 
 
@@ -933,8 +939,8 @@ elif page == "Dataset & Methodology":
 
     st.markdown(
         "The dashboard uses the real Sri Lankan daily generation dataset assembled from the "
-        "verified CEB/PUCSL-derived source. `data/electricity.csv` is the aggregated "
-        "total-generation working dataset used for training and visualization."
+        "verified CEB/PUCSL-derived source. `data/merged-generation-profile-2017-2026.csv` "
+        "is aggregated by date for training and visualization."
     )
 
     st.markdown("### Saved training metadata")
