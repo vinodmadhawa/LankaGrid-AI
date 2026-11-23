@@ -1,7 +1,7 @@
 import argparse, json
 from pathlib import Path
 import joblib, numpy as np, pandas as pd
-from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor, BaggingRegressor, GradientBoostingRegressor, StackingRegressor, HistGradientBoostingRegressor
+from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor, BaggingRegressor, GradientBoostingRegressor, StackingRegressor, HistGradientBoostingRegressor, ExtraTreesRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
@@ -26,7 +26,9 @@ def load_data(path, date_col, target_col):
     if df.date.duplicated().any(): raise ValueError('Duplicate dates: aggregate to one daily total first.')
     if (df.energy_gwh<=0).any(): raise ValueError('Nonpositive generation detected; check data and units.')
     df=df.set_index('date')
-    if len(df)<150: raise ValueError('Need at least 150 consecutive daily observations.')
+    if len(df)<150: raise ValueError('Need at least 150 valid daily observations.')
+    if df.index.has_duplicates: raise ValueError('Duplicate dates remain after aggregation.')
+    if not df.index.is_monotonic_increasing: raise ValueError('Dates are not in chronological order.')
     return df
 
 def features(series):
@@ -44,6 +46,7 @@ def build_models():
       'Decision Tree':DecisionTreeRegressor(max_depth=7,min_samples_leaf=4,random_state=42),
       'Bagging':BaggingRegressor(estimator=DecisionTreeRegressor(max_depth=8,min_samples_leaf=3),n_estimators=70,random_state=42,n_jobs=1),
       'Random Forest':RandomForestRegressor(n_estimators=100,min_samples_leaf=3,random_state=42,n_jobs=1),
+      'Extra Trees':ExtraTreesRegressor(n_estimators=100,min_samples_leaf=3,random_state=42,n_jobs=1),
       'Gradient Boosting':GradientBoostingRegressor(n_estimators=120,learning_rate=.05,max_depth=3,random_state=42),
       'Histogram Boosting':HistGradientBoostingRegressor(max_iter=120,learning_rate=.05,random_state=42),
       'AdaBoost':AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=4,random_state=42),n_estimators=100,learning_rate=.05,random_state=42),
@@ -81,7 +84,7 @@ def main(args):
         source_csv = str(source_path.relative_to(project_root)).replace("\\", "/")
     except ValueError:
         source_csv = str(source_path)
-    (out/'metadata.json').write_text(json.dumps({'source_csv':source_csv,'date_column':args.date_col,'target_column':args.target_col,'train_rows':len(train),'test_rows':len(test),'test_start':str(test.index.min().date()),'test_end':str(test.index.max().date()),'target':'daily total generation (GWh); demand proxy','method':'chronological 80/20 split; one-day-ahead lag features; AdaBoost, XGBoost, stacking, and fixed-weight hybrids'},indent=2))
+    (out/'metadata.json').write_text(json.dumps({'source_csv':source_csv,'date_column':args.date_col,'target_column':args.target_col,'train_rows':len(train),'test_rows':len(test),'test_start':str(test.index.min().date()),'test_end':str(test.index.max().date()),'target':'daily total generation (GWh); demand proxy','method':'chronological 80/20 split; one-day-ahead lag features; bagging, boosting, Extra Trees, AdaBoost, XGBoost, stacking, and fixed-weight hybrids'},indent=2))
     print(pd.DataFrame(results).sort_values('MAE').to_string(index=False))
 
 if __name__=='__main__':

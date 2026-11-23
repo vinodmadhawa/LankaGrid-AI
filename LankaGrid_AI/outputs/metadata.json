@@ -7,5 +7,5 @@
   "test_start": "2024-05-16",
   "test_end": "2026-02-22",
   "target": "daily total generation (GWh); demand proxy",
-  "method": "chronological 80/20 split; one-day-ahead lag features; AdaBoost, XGBoost, stacking, and fixed-weight hybrids"
+  "method": "chronological 80/20 split; one-day-ahead lag features; bagging, boosting, Extra Trees, AdaBoost, XGBoost, stacking, and fixed-weight hybrids"
 }

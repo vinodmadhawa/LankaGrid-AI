@@ -5,7 +5,7 @@
 ## Data
 This project uses `data/merged-generation-profile-2017-2026.csv`. Training aggregates the numeric generation-source columns by date and derives total GWh for each day. Rows where every numeric source is unavailable are omitted; they are not imputed or set to zero.
 
-Do not use or add simulated data. If a source CSV contains individual generating plants or energy in MWh, aggregate plants by date and convert MWh to GWh by dividing by 1,000 before training. The training script rejects duplicate dates, missing calendar dates, nonpositive values, and datasets with fewer than 150 observations.
+Do not use or add simulated data. The source CSV is aggregated across numeric generation-source columns by date. Missing source values are excluded only where every numeric source is unavailable; duplicate dates, nonpositive totals, and datasets with fewer than 150 valid observations are rejected.
 
 Official references: https://www.ceb.lk/index.php?aam_media=43085 and https://www.cbsl.gov.lk/en/statistics/economic-indicators/weekly-indicators
 
@@ -83,7 +83,7 @@ The Streamlit dashboard provides:
 - Historical backtesting, residual analysis and error patterns
 - One-day-ahead predictions from saved model artifacts
 - Permutation importance and methodology limitations
-- AdaBoost and XGBoost boosting comparisons
+- Bagging, boosting, stacking, Extra Trees, AdaBoost and XGBoost comparisons
 - XGBoost + Gradient Boosting hybrid forecast
 - Dark and light themes
 - Responsive layouts for desktop, tablet, and mobile screens
@@ -91,6 +91,14 @@ The Streamlit dashboard provides:
 The Next-Day Forecast Studio uses the latest observed date plus one day. It provides no arbitrary-date or multi-day recursive forecast. The dashboard displays no uncertainty interval because the saved artifacts do not contain statistically validated prediction intervals.
 
 ## Method
-Chronological 80/20 train/test split. Features: 1, 2, 3, 7, 14, 28 day lagged generation, shifted rolling statistics, calendar features. Models: Decision Tree baseline, Bagging, Random Forest, AdaBoost, Gradient Boosting, Histogram Gradient Boosting, XGBoost, Stacking, fixed 50/50 Random Forest + Gradient Boosting hybrid, and fixed 50/50 XGBoost + Gradient Boosting hybrid. Metrics: MAE, RMSE, R². No test data is used for fitting the component models. The hybrids are predefined demonstrations rather than test-optimized weights.
+Chronological 80/20 train/test split. Features: 1, 2, 3, 7, 14, 28 day lagged generation, shifted rolling statistics, calendar features. Models: Decision Tree baseline, Bagging, Random Forest, Extra Trees, AdaBoost, Gradient Boosting, Histogram Gradient Boosting, XGBoost, Stacking, fixed 50/50 Random Forest + Gradient Boosting hybrid, and fixed 50/50 XGBoost + Gradient Boosting hybrid. Metrics: MAE, RMSE, R². No test data is used for fitting the component models. The hybrids are predefined demonstrations rather than test-optimized weights.
+
+## Assignment submission
+
+- Submit the GitHub repository link and hosted dashboard URL if available.
+- Submit the Python notebook and/or reproducible Python scripts.
+- Include a maximum three-minute screen-recorded explanation covering: the Sri Lankan context, source data and aggregation, feature engineering, model comparison, the best-performing model, and limitations.
+- Explain each result in your own words; do not present generated code as your own without disclosure.
+- The repository should run with the commands above and include saved artifacts under `outputs/`.
 
 **Research limitation:** scikit-learn's standard StackingRegressor uses ordinary cross-validation internally; this is not fully time-series-aware. For a more rigorous paper, implement expanding-window out-of-fold stacking, a validation set for hyperparameter tuning, and rolling-origin evaluation. The held-out test set is chronological.
