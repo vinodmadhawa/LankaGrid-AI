@@ -9,68 +9,85 @@ Do not use or add simulated data. The source CSV is aggregated across numeric ge
 
 Official references: https://www.ceb.lk/index.php?aam_media=43085 and https://www.cbsl.gov.lk/en/statistics/economic-indicators/weekly-indicators
 
-## Run on Windows
+## Run the Dashboard from GitHub
 
-From Command Prompt or PowerShell, open the project folder:
+### 1. Download the project
 
-```bat
-cd "C:\Users\Vinod Madhawa\Desktop\ML Assignment 1\LankaGrid_AI"
-```
-
-### First-time setup
-
-Create and activate the virtual environment, install dependencies, and generate the model outputs:
-
-```bat
-py -3.12 -m venv .venv
-.venv\Scripts\activate.bat
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python train.py --csv data/merged-generation-profile-2017-2026.csv --date-col "Date (GMT+5:30)" --target-col total_gwh --output outputs
-```
-
-PowerShell users can activate the environment with:
+Open Command Prompt or PowerShell and clone the repository:
 
 ```powershell
-.venv\Scripts\Activate.ps1
+git clone https://github.com/vinodmadhawa/LankaGrid-AI.git
+cd LankaGrid-AI
+cd LankaGrid_AI
 ```
 
-If PowerShell blocks activation, enable it only for the current terminal:
+Verify that `app.py`, `train.py`, `requirements.txt`, `data/`, and `outputs/` are in the current folder.
+
+### 2. Create and activate the Python environment
+
+Python 3.12 is recommended.
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+If PowerShell blocks virtual-environment activation:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-### Start the dashboard
-
-After setup and training, run:
+Command Prompt users can activate the environment with:
 
 ```bat
-.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8501
+.venv\Scripts\activate.bat
+```
+
+### 3. Train the models
+
+Run this once or whenever the source data or training code is updated:
+
+```powershell
+python train.py --csv "data/merged-generation-profile-2017-2026.csv" --date-col "Date (GMT+5:30)" --target-col total_gwh --output outputs
+```
+
+This creates the saved model and prediction files in `outputs/`.
+
+### 4. Start the dashboard
+
+Use the virtual-environment executable to avoid environment conflicts:
+
+```powershell
+.\.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8501
 ```
 
 Open <http://127.0.0.1:8501>.
 
-To stop the dashboard, press `Ctrl+C` in the terminal. The dashboard loads saved metrics and predictions from `outputs/`; it does not retrain models through the UI.
+To stop the dashboard, press `Ctrl+C` in the terminal.
 
-If port `8501` is already in use, start the dashboard on another port and open that address:
+If port `8501` is already in use:
 
-```bat
-.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8502
+```powershell
+.\.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8502
 ```
 
 Open <http://127.0.0.1:8502>.
 
-### Run again without retraining
+### 5. Run the dashboard without retraining
 
-If `outputs/` already contains the generated artifacts, activate the existing environment and start the dashboard directly:
+After the repository has already been cloned and dependencies have been installed, the dashboard can use the saved files in `outputs/`:
 
-```bat
-cd "C:\Users\Vinod Madhawa\Desktop\ML Assignment 1\LankaGrid_AI"
-.venv\Scripts\activate.bat
-.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8501
+```powershell
+cd "path\to\LankaGrid-AI\LankaGrid_AI"
+.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\streamlit.exe run app.py --server.headless true --server.address 127.0.0.1 --server.port 8501
 ```
+
+The dashboard loads saved metrics and predictions; it does not retrain models through the browser interface.
 
 ## Dashboard
 
