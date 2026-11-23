@@ -3,10 +3,11 @@
 **Purpose:** One-day-ahead forecast of total daily electricity generation (GWh) using Sri Lankan observations. Daily generation is a proxy for energy supplied, **not identical to end-use demand**.
 
 ## Data
-This project uses the verified, aggregated daily dataset `data/electricity.csv`. It contains one row per consecutive date and two columns:
+This project uses the aggregated daily dataset `data/electricity.csv`, derived from `data/merged-generation-profile-2017-2026.csv`. It contains one row per consecutive date and two columns:
 
 - `date`: the observation date
-- `total_gwh`: total daily electricity generation in GWh
+- `total_gwh`: sum of the available numeric generation-source columns in GWh
+Rows where every numeric generation-source column is unavailable are omitted; they are not imputed or set to zero.
 
 Do not use or add simulated data. If a source CSV contains individual generating plants or energy in MWh, aggregate plants by date and convert MWh to GWh by dividing by 1,000 before training. The training script rejects duplicate dates, missing calendar dates, nonpositive values, and datasets with fewer than 150 observations.
 

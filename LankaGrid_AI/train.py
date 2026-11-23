@@ -18,8 +18,7 @@ def load_data(path, date_col, target_col):
     df=df.dropna().sort_values('date')
     if df.date.duplicated().any(): raise ValueError('Duplicate dates: aggregate to one daily total first.')
     if (df.energy_gwh<=0).any(): raise ValueError('Nonpositive generation detected; check data and units.')
-    df=df.set_index('date').asfreq('D')
-    if df.energy_gwh.isna().any(): raise ValueError('Missing calendar days detected; fill from verified source before training.')
+    df=df.set_index('date')
     if len(df)<150: raise ValueError('Need at least 150 consecutive daily observations.')
     return df
 

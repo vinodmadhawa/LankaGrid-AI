@@ -2,9 +2,9 @@
   "source_csv": "data/electricity.csv",
   "date_column": "date",
   "target_column": "total_gwh",
-  "train_rows": 2649,
-  "test_rows": 663,
-  "test_start": "2024-05-01",
+  "train_rows": 2588,
+  "test_rows": 648,
+  "test_start": "2024-05-16",
   "test_end": "2026-02-22",
   "target": "daily total generation (GWh); demand proxy",
   "method": "chronological 80/20 split; one-day-ahead lag features; AdaBoost, XGBoost, stacking, and fixed-weight hybrids"
