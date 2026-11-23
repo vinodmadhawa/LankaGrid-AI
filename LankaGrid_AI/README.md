@@ -110,12 +110,4 @@ The Next-Day Forecast Studio uses the latest observed date plus one day. It prov
 ## Method
 Chronological 80/20 train/test split. Features: 1, 2, 3, 7, 14, 28 day lagged generation, shifted rolling statistics, calendar features. Models: Decision Tree baseline, Bagging, Random Forest, Extra Trees, AdaBoost, Gradient Boosting, Histogram Gradient Boosting, XGBoost, Stacking, fixed 50/50 Random Forest + Gradient Boosting hybrid, and fixed 50/50 XGBoost + Gradient Boosting hybrid. Metrics: MAE, RMSE, R². No test data is used for fitting the component models. The hybrids are predefined demonstrations rather than test-optimized weights.
 
-## Assignment submission
-
-- Submit the GitHub repository link and hosted dashboard URL if available.
-- Submit the Python notebook and/or reproducible Python scripts.
-- Include a maximum three-minute screen-recorded explanation covering: the Sri Lankan context, source data and aggregation, feature engineering, model comparison, the best-performing model, and limitations.
-- Explain each result in your own words; do not present generated code as your own without disclosure.
-- The repository should run with the commands above and include saved artifacts under `outputs/`.
-
 **Research limitation:** scikit-learn's standard StackingRegressor uses ordinary cross-validation internally; this is not fully time-series-aware. For a more rigorous paper, implement expanding-window out-of-fold stacking, a validation set for hyperparameter tuning, and rolling-origin evaluation. The held-out test set is chronological.
